@@ -35,6 +35,10 @@ class SensorFusion(object):
     def update_sensor_fusion(self, whole_msgs):
         self.other_cars = np.array(whole_msgs['sensor_fusion'])
 
+    def generate_prediction(self, start, end):
+        pass
+
+
 
 class CarStatus(object):
     def __init__(self):
