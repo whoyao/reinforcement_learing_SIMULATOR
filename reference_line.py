@@ -2,7 +2,7 @@ import numpy as np
 
 from bisect import bisect
 from scipy.spatial import cKDTree
-from frenet_utils import normalize_angle, cartesian_to_frenet_array
+from frenet_utils import normalize_angle, cartesian_to_frenet_array, frenet_to_cartesian_easy
 
 
 
@@ -67,7 +67,7 @@ class ReferenceLine:
         index_start = self.get_match_index_s(s)
         if index_start == len(self.reference_line)-1:
             return self.reference_line[index_start]
-        return interpolate_linear(self.reference_line[index_start], self.reference_line[index_start+1])
+        return interpolate_linear(self.reference_line[index_start], self.reference_line[index_start+1], s)
 
     def match_to_path_xy(self, point):
         dis, index_min = self.get_match_index_xy(point)
@@ -82,10 +82,17 @@ class ReferenceLine:
         return find_projection_point(self.reference_line[index_start], self.reference_line[index_end], point)
 
     def calculate_frenet(self, x, y, v, a, theta, kappa):
-        return cartesian_to_frenet_array(self.match_to_path_s(np.array([x, y])), x, y, v, a, theta, kappa)
+        return cartesian_to_frenet_array(self.match_to_path_xy(np.array([x, y])), x, y, v, a, theta, kappa)
+
+    def calculate_cartesian_points(self, frenet_points):
+        cartesian_points = []
+        for point in frenet_points:
+            reference_point = self.match_to_path_s(point[0])
+            cartesian_points.append(frenet_to_cartesian_easy(reference_point, point[3:6]))
+        return cartesian_points
 
 
-
+# debug usage
 if __name__ == '__main__':
     tree = gen_kd_tree(read_file("highway_out.txt"))
     print(tree.query([1765.1, 2972.9], k=1))

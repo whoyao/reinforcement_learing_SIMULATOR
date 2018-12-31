@@ -2,10 +2,15 @@ import numpy as np
 import reference_line
 
 TIME_HORIZON = 0.02
-TIME_PREDICT = 4
-TARGET_LON = np.array([20, 40, 60])
-TARGET_LAT = np.array([-2.0, 0.0, 2.0])
+TIME_PREDICT = 4.0
+TIME_KEEP = 0.5
+NUM_KEEP = int(TIME_KEEP/TIME_HORIZON)
+# TARGET_LON = np.array([[20.0, 0.0, 0.0], [40.0, 0.0, 0.0], [60.0, 0.0, 0.0]])
+# TARGET_LAT = np.array([[-2.0, 0.0, 0.0], [0.0, 0.0, 0.0], [2.0, 0.0, 0.0]])
+TARGET_LON = np.array([[60.0, 0.0, 0.0]])
+TARGET_LAT = np.array([[2.0, 0.0, 0.0]])
 TARGET = [(s, d) for s in TARGET_LON for d in TARGET_LAT]
+
 
 
 class RoadPosition(object):
@@ -27,6 +32,25 @@ class RoadPosition(object):
     def get_previous_path(self):
         return np.vstack((self.previous_path_x, self.previous_path_y))
 
+    def get_start_point(self):
+        index = NUM_KEEP - 1
+        if len(self.previous_path_x) < 10:
+            return None, None
+        if len(self.previous_path_x) < NUM_KEEP:
+            index = len(self.previous_path_x) - 1
+        res_x = self.previous_path_x[index]
+        res_y = self.previous_path_y[index]
+        vx_t = (self.previous_path_x[index] - self.previous_path_x[index-1])/TIME_HORIZON
+        vy_t = (self.previous_path_y[index] - self.previous_path_y[index-1])/TIME_HORIZON
+        res_v = np.linalg.norm([vx_t, vy_t])
+        res_theta = np.arctan(vy_t/vx_t)
+        vx_t_minus_1 = (self.previous_path_x[index-1] - self.previous_path_x[index-2])/TIME_HORIZON
+        vy_t_minus_1 = (self.previous_path_y[index-1] - self.previous_path_y[index-2])/TIME_HORIZON
+        v_t_minus_1 = np.linalg.norm([vx_t_minus_1, vy_t_minus_1])
+        res_a = (res_v - v_t_minus_1)/TIME_HORIZON
+        return (res_x, res_y, res_v, res_a, res_theta, 0.0), np.hstack((self.previous_path_x[:index],
+                                                                        self.previous_path_y[:index]))
+
 
 # A 2d vector of cars and then that car's
 # car's unique ID,
@@ -45,8 +69,9 @@ class SensorFusion(object):
         self.other_cars = np.array(whole_msgs['sensor_fusion'])
         car_frenet = []
         for car in self.other_cars:
-            car_s, car_d = reference_line_in.calculate_frenet(car[1], car[2], np.linalg.norm([car[3], car[4]]), 0.0, np.arctan(car[4]/car[3]), 0.0)
-            car_frenet.append(np.array([car_s, car_d]))
+            car_s, car_d = reference_line_in.calculate_frenet(car[1], car[2], np.linalg.norm([car[3], car[4]]), 0.0,
+                                                              np.arctan(car[4]/max(car[3], np.finfo(float).eps)), 0.0)
+            car_frenet.append(np.concatenate((car_s, car_d)))
         self.other_cars = np.hstack((self.other_cars, car_frenet))
 
     def generate_prediction(self, reference_line, start, end):
@@ -78,6 +103,7 @@ class CarStatus(object):
         self.speed = 0.0
 
     def update_car_status(self, whole_msgs):
+        print(whole_msgs)
         self.s = whole_msgs['s']
         self.d = whole_msgs['d']
         self.x = whole_msgs['x']
@@ -92,4 +118,7 @@ class CarStatus(object):
 
     def get_car_position_sd(self):
         return np.array([self.s, self.d])
+
+    def get_car_start(self):
+        return self.x, self.y, self.speed, 0.0, self.yaw, 0.0
 

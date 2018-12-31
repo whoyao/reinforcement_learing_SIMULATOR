@@ -7,14 +7,16 @@ import numpy as np
 import websockets
 
 from base_struct import CarStatus, RoadPosition, SensorFusion
+from control import Control
 
 
-car_status = CarStatus()
-sensor_fusion = SensorFusion()
-road_info = RoadPosition()
+# car_status = CarStatus()
+# sensor_fusion = SensorFusion()
+# road_info = RoadPosition()
 
+control = Control("highway_out.txt")
 
-async def hello(websocket, path):
+async def task_callback(websocket, path):
     while True:
         # await websocket.send(control_msg)
         try:
@@ -24,19 +26,14 @@ async def hello(websocket, path):
                 data = json.loads(message)
                 status = data[0]
                 detail_data = data[1]
-                car_status.update_car_status(detail_data)
-                sensor_fusion.update_sensor_fusion(detail_data)
-                road_info.update_road_position(detail_data)
-                print(car_status.get_car_position_xyyaw())
-                print(sensor_fusion.other_cars)
-                print(road_info.get_previous_path())
+                print(control.update(detail_data))
             else:
                 continue
         except websockets.exceptions.ConnectionClosed:
             pass
 
 
-start_server = websockets.serve(hello, 'localhost', 4567)
+start_server = websockets.serve(task_callback, 'localhost', 4567)
 
 asyncio.get_event_loop().run_until_complete(start_server)
 asyncio.get_event_loop().run_forever()

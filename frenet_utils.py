@@ -76,7 +76,17 @@ def frenet_to_cartesian( reference, s_condition, d_condition):
 
     return res_x, res_y, res_theta, res_kappa, res_v, res_a
 
-#debug use
+
+def frenet_to_cartesian_easy(reference, d_condition):
+    sin_theta_r = np.sin(reference[3])
+    cos_theta_r = np.cos(reference[3])
+    res_x = reference[1] + sin_theta_r * d_condition[0]
+    res_y = reference[2] - cos_theta_r * d_condition[0]
+
+    return res_x, res_y
+
+
+# debug usage
 if __name__ == '__main__':
     input = np.array([10.0, 0.0, 0.0, np.pi/4,0.1,0.01])
     middle = cartesian_to_frenet_array(input, -1.0, 1.0, 2.0, 0.0, np.pi/3.0, 0.11)
