@@ -46,7 +46,7 @@ def cartesian_to_frenet_array(reference, x, y, v, a, theta, kappa):
     return res_s, res_d
 
 
-def cartesian_to_frenet_point(reference, x, y, v, a, theta, kappa):
+def cartesian_to_frenet_point(reference, x, y):
     delta_position = np.array([x, y]) - reference[1:3]
     cos_sin = np.array([np.cos(reference[3]), np.sin(reference[3])])
     cross_rd_nd = np.cross(delta_position, cos_sin)
@@ -76,6 +76,7 @@ def frenet_to_cartesian( reference, s_condition, d_condition):
 
     return res_x, res_y, res_theta, res_kappa, res_v, res_a
 
-
-input = np.array([10.0, 0.0, 0.0, np.pi/4,0.1,0.01])
-middle = cartesian_to_frenet_array(input, -1.0, 1.0, 2.0, 0.0, np.pi/3.0, 0.11)
+#debug use
+if __name__ == '__main__':
+    input = np.array([10.0, 0.0, 0.0, np.pi/4,0.1,0.01])
+    middle = cartesian_to_frenet_array(input, -1.0, 1.0, 2.0, 0.0, np.pi/3.0, 0.11)
