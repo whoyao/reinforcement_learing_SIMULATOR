@@ -48,8 +48,8 @@ class RoadPosition(object):
         vy_t_minus_1 = (self.previous_path_y[index-1] - self.previous_path_y[index-2])/TIME_HORIZON
         v_t_minus_1 = np.linalg.norm([vx_t_minus_1, vy_t_minus_1])
         res_a = (res_v - v_t_minus_1)/TIME_HORIZON
-        return (res_x, res_y, res_v, res_a, res_theta, 0.0), np.hstack((self.previous_path_x[:index],
-                                                                        self.previous_path_y[:index]))
+        return (res_x, res_y, res_v, res_a, res_theta, 0.0), np.hstack((np.expand_dims(
+            self.previous_path_x[:index], axis=1), np.expand_dims(self.previous_path_y[:index], axis=1)))
 
 
 # A 2d vector of cars and then that car's

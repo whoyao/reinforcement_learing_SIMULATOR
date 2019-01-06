@@ -26,7 +26,11 @@ async def task_callback(websocket, path):
                 data = json.loads(message)
                 status = data[0]
                 detail_data = data[1]
-                print(control.update(detail_data))
+                print(detail_data)
+                new_path = control.update(detail_data)
+                res_msg = json.dumps(['control', {'next_x': new_path[:, 0].tolist(), 'next_y':new_path[:, 1].tolist()}])
+                print("42"+res_msg)
+                await websocket.send("42"+res_msg)
             else:
                 continue
         except websockets.exceptions.ConnectionClosed:

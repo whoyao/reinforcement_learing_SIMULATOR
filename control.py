@@ -20,8 +20,13 @@ class Control:
         start_point_xy, keep_path = self.road_info.get_start_point()
         if start_point_xy is None:
             start_point_xy = self.car_status.get_car_start()
-            keep_path = []
-        start_point_sd = self.reference_line.calculate_frenet(start_point_xy)
+        start_point_sd = self.reference_line.calculate_frenet(start_point_xy[0], start_point_xy[1], start_point_xy[2],
+                                                              start_point_xy[3], start_point_xy[4], start_point_xy[5])
         self.trajectory_gen.generate_trajectories(start_point_sd)
-        return np.concatenate(keep_path, self.trajectory_gen.get_trajectory_xy(self.reference_line, 0))
+        trajectory_in_xy = self.trajectory_gen.get_trajectory_xy(self.reference_line, 0)
+        if keep_path is None:
+            return np.array(trajectory_in_xy)
+        # print("keep_path:")
+        # print(np.concatenate([keep_path, np.array(trajectory_in_xy)]))
+        return np.concatenate([keep_path, np.array(trajectory_in_xy)])
 

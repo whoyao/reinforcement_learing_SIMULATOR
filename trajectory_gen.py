@@ -49,8 +49,8 @@ class TrajectoryGen:
         res_trajectories = []
         res_coefficients = []
         for target in TARGET:
-            coefficient_s = self.jerk_minimal_solver(start[0], target[0], TIME_PREDICT)
-            coefficient_d = self.jerk_minimal_solver(start[1], target[1], TIME_PREDICT)
+            coefficient_s = self.jerk_minimal_solver(start[0], start[0] + target[0], TIME_PREDICT)
+            coefficient_d = self.jerk_minimal_solver(start[1], start[1] + target[1], TIME_PREDICT)
             res_coefficients.append((coefficient_s, coefficient_d))
             res_trajectories.append(np.hstack((coefficient_s.eval(TIME_HORIZON, TIME_PREDICT, TIME_HORIZON),
                                                coefficient_d.eval(TIME_HORIZON, TIME_PREDICT, TIME_HORIZON))))

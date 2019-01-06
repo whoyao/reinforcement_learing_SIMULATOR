@@ -88,5 +88,7 @@ def frenet_to_cartesian_easy(reference, d_condition):
 
 # debug usage
 if __name__ == '__main__':
-    input = np.array([10.0, 0.0, 0.0, np.pi/4,0.1,0.01])
-    middle = cartesian_to_frenet_array(input, -1.0, 1.0, 2.0, 0.0, np.pi/3.0, 0.11)
+    # input = np.array([10.0, 0.0, 0.0, np.pi/4,0.1,0.01])
+    # middle = cartesian_to_frenet_array(input, -1.0, 1.0, 2.0, 0.0, np.pi/3.0, 0.11)
+    input = np.array([3285.35889, 2033.295975, 2999.8114241, -3.140654004923, 0.004263910, 0.000233226])
+    print(frenet_to_cartesian(input, np.array([3285.35889, 20.21, -0.041244]), np.array([-6.0, 0.0, 0.0])))
